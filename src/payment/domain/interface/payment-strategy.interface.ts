@@ -1,0 +1,3 @@
+interface IPaymentStrategy {
+    calculatePayment: () => number;
+}

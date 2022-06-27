@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(255)
+  status    Boolean    @db.TinyInt
+  type      Int        @db.TinyInt
+  price     Int        @db.Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  UserRoom  UserRoom[]
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  firstName   String     @db.Char(50)
+  lastName    String     @db.Char(50)
+  status      Boolean    @db.TinyInt
+  type        Int        @db.TinyInt
+  gender      Int        @db.TinyInt
+  dateOfBirth DateTime   @db.Date
+  email       String     @unique @db.VarChar(255)
+  phoneNumber String     @unique @db.VarChar(255)
+  password    String     @db.VarChar(255)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  UserRoom    UserRoom[]
+  UserRole    UserRole[]
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  UserRole   UserRole[]
+  RoleDetail RoleDetail[]
+}
+
+model UserRole {
+  id        Int      @id @default(autoincrement())
+  roleId    Int      @db.Int
+  userId    Int      @db.Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model RoleDetail {
+  id         Int      @id @default(autoincrement())
+  roleId     Int      @db.Int
+  moduleName String   @db.VarChar(255)
+  list       Boolean  @db.TinyInt
+  view       Boolean  @db.TinyInt
+  create     Boolean  @db.TinyInt
+  update     Boolean  @db.TinyInt
+  delete     Boolean  @db.TinyInt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model UserRoom {
+  id        Int      @id @default(autoincrement())
+  roomId    Int      @db.Int
+  userId    Int      @db.Int
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bill {
+  id         Int          @id @default(autoincrement())
+  period     DateTime     @db.Date
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  BillDetail BillDetail[]
+  Payment    Payment[]
+}
+
+model BillDetail {
+  id        Int      @id @default(autoincrement())
+  billId    Int      @db.Int
+  utilityId Int      @db.Int
+  amount    Int      @db.Int
+  quantity  Int      @db.Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bill      Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  utility   Utility? @relation(fields: [utilityId], references: [id])
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  billId      Int      @db.Int
+  type        Int      @db.TinyInt
+  received    Int      @db.Int
+  change      Int      @db.Int
+  amount      Int      @db.Int
+  paymentType Int      @db.TinyInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  bill        Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+}
+
+model Utility {
+  id         Int          @id @default(autoincrement())
+  type       Int          @db.TinyInt
+  oldIndex   Int          @db.MediumInt
+  newIndex   Int          @db.MediumInt
+  amount     Int          @db.Int
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  BillDetail BillDetail[]
+}
